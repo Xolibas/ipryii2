@@ -29,14 +29,20 @@ class DefaultController extends AdminController
                  'pages' => $pages,
             ]);
         }
-        else return $this->redirect(['/post/index']);
+        else return $this->redirect(['/posts']);
     }
 
     public function actionUser($id){
-        $model = $this->findModel($id);
-        return $this->render('user', [
-            'model' => $model,
-        ]);
+        if(Yii::$app->user->identity->role=='admin'){
+            $model = $this->findModel($id);
+            return $this->render('user', [
+                'model' => $model,
+            ]);
+        }
+        else{
+            return $this->redirect(['/posts']);
+        }
+
     }
 
     public function actionUpdate($id){
