@@ -85,7 +85,7 @@ class PostController extends Controller
             ]);
         }
         else{
-            return $this->redirect('index');
+            return $this->redirect('/posts');
         }
     }
 
@@ -125,11 +125,15 @@ class PostController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-
-        if ($model->load(Yii::$app->request->post()) && $model->user_id==$this->getUserId()) {
-            $model->updated_at = date('y-m-d h:i:s');
-            if($model->save())
-            return $this->redirect(['view', 'id' => $model->id]);
+        if($model->user_id==$this->getUserId()){
+            if ($model->load(Yii::$app->request->post())) {
+                $model->updated_at = date('y-m-d h:i:s');
+                if($model->save())
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+        }
+        else{
+            return $this->redirect(['/posts']);
         }
 
         return $this->render('update', [
