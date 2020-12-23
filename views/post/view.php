@@ -45,7 +45,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'title'         => $model->title,
     ]); ?>
     <?php endif; ?>
-
-    <?= $this->render('/comment/index',compact($model->id)) ?>
+    <?= $this->render('comment/_create',[
+        'model' => $newcomment,
+    ]) ?>
+    <?= $this->render('comment/_index',[
+        'model' => $comments,
+        'pages' => $pages,
+    ]) ?>
 
 </div>

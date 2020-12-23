@@ -64,14 +64,24 @@ class PostController extends Controller
      */
     public function actionView($id)
     {
+        $newcomment = new Comment();
         $model = $this->findModel($id);
-        if($model->user_id==Yii::$app->user->identity->id || $model->status==1){
-            $dataProvider = new ActiveDataProvider([
-                'query' => Comment::find()->where(['post_id'=>$id]),
-            ]);
+        if($model->user_id==$this->getUserId() || $model->status==1){
+            if($newcomment->load(Yii::$app->request->post())){
+                $newcomment->user_id = $this->getUserId();
+                $newcomment->post_id = $id;
+                $newcomment->created_at = date('y-m-d h:i:s');
+                $newcomment->save();
+            }
+            $query = Comment::find()->where(['post_id'=>$id]);
+            $newcomment = new Comment();
+            $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => 5, 'forcePageParam' => false, 'pageSizeParam' => false]);
+            $comments = $query->offset($pages->offset)->limit($pages->limit)->all();
             return $this->render('view', [
                 'model' => $model,
-                'dataProvider' => $dataProvider,
+                'comments' => $comments,
+                'pages'=>$pages,
+                'newcomment' => $newcomment,
             ]);
         }
         else{
@@ -92,7 +102,7 @@ class PostController extends Controller
             $model->title = $_POST['Post']['title'];
             $model->text = $_POST['Post']['text'];
             $model->status = (int)$_POST['Post']['status'];
-            $model->user_id = Yii::$app->user->identity->id;
+            $model->user_id = $this->getUserId();
             $model->id = uniqid();
             $model->created_at = date('y-m-d h:i:s');
             if($model->save()){
@@ -116,7 +126,7 @@ class PostController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->user_id==Yii::$app->user->identity->id) {
+        if ($model->load(Yii::$app->request->post()) && $model->user_id==$this->getUserId()) {
             $model->updated_at = date('y-m-d h:i:s');
             if($model->save())
             return $this->redirect(['view', 'id' => $model->id]);
@@ -137,9 +147,17 @@ class PostController extends Controller
     public function actionDelete($id)
     {
         $model = $this->findModel($id);
-        if($model->user_id==Yii::$app->user->identity->id && !$model->status)
+        if($model->user_id==$this->getUserId() && !$model->status)
         $model->delete();
         return $this->redirect(['index']);
+    }
+
+    public function actionDeletec($id,$post_id)
+    {
+        $model = Comment::findOne($id);
+        if($model->user_id==$this->getUserId())
+        $model->delete();
+        return $this->redirect(['view','id'=>$post_id]);
     }
 
     /**
@@ -156,5 +174,9 @@ class PostController extends Controller
         }
 
         throw new NotFoundHttpException('The requested page does not exist.');
+    }
+
+    protected function getUserId(){
+        return Yii::$app->user->identity->id;
     }
 }
