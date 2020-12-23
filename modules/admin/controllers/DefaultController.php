@@ -47,14 +47,16 @@ class DefaultController extends AdminController
 
     public function actionUpdate($id){
         $model =$this->findModel($id);
-        if($model->id != Yii::$app->user->identity->id && $model->role != 'admin'){
-            if($model->status){
-                $model->status = 0;
-            } 
-            else{
-                $model->status = 1;
-            } 
-            $model->save();
+        if(Yii::$app->user->identity->role=='admin'){
+            if($model->id != Yii::$app->user->identity->id && $model->role != 'admin'){
+                if($model->status){
+                    $model->status = 0;
+                } 
+                else{
+                    $model->status = 1;
+                } 
+                $model->save();
+            }
         }
         return $this->redirect(['user','id'=>$id]);
     }
