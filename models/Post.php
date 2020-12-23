@@ -39,7 +39,7 @@ class Post extends \yii\db\ActiveRecord
             ['text','trim'],
             [['status', 'user_id'], 'integer'],
             [['created_at', 'updated_at'], 'safe'],
-            [['id', 'title'], 'string', 'max' => 255],
+            [['id', 'title','text'], 'string', 'max' => 255],
             [['id'], 'unique'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
         ];
