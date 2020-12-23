@@ -45,9 +45,13 @@ $this->params['breadcrumbs'][] = $this->title;
         'title'         => $model->title,
     ]); ?>
     <?php endif; ?>
-    <?= $this->render('comment/_create',[
-        'model' => $newcomment,
-    ]) ?>
+    <?php if(!Yii::$app->user->isGuest): ?>
+        <?= $this->render('comment/_create',[
+            'model' => $newcomment,
+        ]) ?>
+    <?php else: ?>
+        <h1>To write the comments <a href="<?= yii\helpers\Url::toRoute('/login'); ?>" class="btn btn-success">Login</a></h1>
+    <?php endif; ?>
     <?= $this->render('comment/_index',[
         'model' => $comments,
         'pages' => $pages,

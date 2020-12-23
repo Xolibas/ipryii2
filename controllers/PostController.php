@@ -35,7 +35,7 @@ class PostController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['@'],
+                        'roles' => ['@','?'],
                     ],
                 ],
             ],
@@ -67,7 +67,7 @@ class PostController extends Controller
         $newcomment = new Comment();
         $model = $this->findModel($id);
         if($model->user_id==$this->getUserId() || $model->status==1){
-            if($newcomment->load(Yii::$app->request->post())){
+            if($newcomment->load(Yii::$app->request->post())&&(!Yii::$app->user->isGuest)){
                 $newcomment->user_id = $this->getUserId();
                 $newcomment->post_id = $id;
                 $newcomment->created_at = date('y-m-d h:i:s');
