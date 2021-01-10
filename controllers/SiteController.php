@@ -136,10 +136,7 @@ class SiteController extends Controller
     
         if ($model->load(Yii::$app->request->post())) {      
             if ($model->validate()) {
-                // form inputs are valid, do something here
-                $model->username = $_POST['User']['username'];
-                $model->email = $_POST['User']['email'];
-                $model->password = Yii::$app->getSecurity()->generatePasswordHash($_POST['User']['password']);
+                $model->password = Yii::$app->getSecurity()->generatePasswordHash($model->password);
                 $model->role = 'user';
                 $model->status = 1;
                 if($model->save()){

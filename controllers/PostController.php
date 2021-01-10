@@ -12,6 +12,7 @@ use yii\filters\VerbFilter;
 use yii\filters\AccessControl;
 use yii\data\Pagination;
 use yii\data\ActiveDataProvider;
+use yii\helpers\Url;
 
 /**
  * PostController implements the CRUD actions for Post model.
@@ -35,7 +36,7 @@ class PostController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'roles' => ['@','?'],
+                        'roles' => ['@'],
                     ],
                 ],
             ],
@@ -85,7 +86,7 @@ class PostController extends Controller
             ]);
         }
         else{
-            return $this->redirect('/posts');
+            return $this->redirect(Url::to(['/posts']));
         }
     }
 
@@ -99,9 +100,6 @@ class PostController extends Controller
         $model = new Post();
 
         if ($model->load(Yii::$app->request->post())) {
-            $model->title = $_POST['Post']['title'];
-            $model->text = $_POST['Post']['text'];
-            $model->status = (int)$_POST['Post']['status'];
             $model->user_id = $this->getUserId();
             $model->id = uniqid();
             $model->created_at = date('y-m-d h:i:s');
@@ -133,7 +131,7 @@ class PostController extends Controller
             }
         }
         else{
-            return $this->redirect(['/posts']);
+            return $this->redirect(Url::to(['/posts']));
         }
 
         return $this->render('update', [
@@ -153,7 +151,7 @@ class PostController extends Controller
         $model = $this->findModel($id);
         if($model->user_id==$this->getUserId() && !$model->status)
         $model->delete();
-        return $this->redirect(['index']);
+        return $this->redirect(Url::to(['/index']));
     }
 
     public function actionDeletec($id,$post_id)
@@ -161,7 +159,7 @@ class PostController extends Controller
         $model = Comment::findOne($id);
         if($model->user_id==$this->getUserId())
         $model->delete();
-        return $this->redirect(['view','id'=>$post_id]);
+        return $this->redirect(Url::to(['view','id'=>$post_id]));
     }
 
     /**

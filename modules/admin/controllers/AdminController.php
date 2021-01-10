@@ -19,6 +19,12 @@ class AdminController extends Controller
                     [
                         'allow' => true,
                         'roles' => ['@'],
+                        'matchCallback' => function ($rule, $action) {
+                            if (Yii::$app->user->identity->role == 'admin') {
+                                return true;
+                            }
+                            return false;
+                        }
                     ],
                 ],
             ],

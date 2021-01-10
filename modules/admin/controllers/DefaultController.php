@@ -16,38 +16,27 @@ class DefaultController extends AdminController
      */
     public function actionIndex()
     {
-        if(Yii::$app->user->identity->role == 'admin')
-        {
-            $query = User::find();
-            $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => 10, 'forcePageParam' => false, 'pageSizeParam' => false]);
-            $users = $query->offset($pages->offset)
-                ->limit($pages->limit)
-                ->all();
+        $query = User::find();
+        $pages = new Pagination(['totalCount' => $query->count(), 'pageSize' => 10, 'forcePageParam' => false, 'pageSizeParam' => false]);
+        $users = $query->offset($pages->offset)
+            ->limit($pages->limit)
+            ->all();
         
-            return $this->render('index', [
-                 'users' => $users,
-                 'pages' => $pages,
-            ]);
-        }
-        else return $this->redirect(['/posts']);
+        return $this->render('index', [
+            'users' => $users,
+            'pages' => $pages,
+        ]);
     }
 
     public function actionUser($id){
-        if(Yii::$app->user->identity->role=='admin'){
-            $model = $this->findModel($id);
-            return $this->render('user', [
-                'model' => $model,
-            ]);
-        }
-        else{
-            return $this->redirect(['/posts']);
-        }
-
+        $model = $this->findModel($id);
+        return $this->render('user', [
+            'model' => $model,
+        ]);
     }
 
     public function actionUpdate($id){
         $model =$this->findModel($id);
-        if(Yii::$app->user->identity->role=='admin'){
             if($model->id != Yii::$app->user->identity->id && $model->role != 'admin'){
                 if($model->status){
                     $model->status = 0;
@@ -57,7 +46,6 @@ class DefaultController extends AdminController
                 } 
                 $model->save();
             }
-        }
         return $this->redirect(['user','id'=>$id]);
     }
 
