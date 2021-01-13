@@ -33,7 +33,7 @@ class PostService
     {
         $post = $this->posts->get($id);
 
-        $post = Post::edit(
+        $post->edit(
             $form->title,
             $form->text,
             $form->status
@@ -45,8 +45,11 @@ class PostService
 
     public function remove($id): void
     {
-        $post = $this->posts->get($id);
-        $this->posts->remove($post);
+        if(!$post->isActive())
+        {
+            $post = $this->posts->get($id);
+            $this->posts->remove($post);
+        }
     }
 
 }

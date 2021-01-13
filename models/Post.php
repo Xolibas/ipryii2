@@ -55,20 +55,20 @@ class Post extends \yii\db\ActiveRecord
         return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 
-    public static function create($title, $text, $status): self
+    public static function create(string $title, string $text, string $status)
     {
-        $post = new static();
+        $post = new Post();
         $post->title = $title;
         $post->text = $text;
         $post->user_id = Yii::$app->user->id;
         $post->id = uniqid();
         $post->status = $status;
         $post->created_at = date('y-m-d h:i:s');
-        
+
         return $post;
     }
 
-    public function edit($title, $text, $status): void
+    public function edit(string $title, string $text, string $status): void
     {
         $this->title = $title;
         $this->text = $text;

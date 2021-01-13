@@ -142,39 +142,12 @@ class PostController extends Controller
                 Yii::$app->errorHandler->logException($e);
                 Yii::$app->session->setFlash('error', $e->getMessage());
             }
-
         }
 
         return $this->render('create', [
             'model' => $form,
         ]);
     }
-
-    /**
-     * Updates an existing Post model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param string $id
-     * @return mixed
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    // public function actionUpdate($id)
-    // {
-    //     $model = $this->findModel($id);
-    //     if($model->user_id==$this->getUserId()){
-    //         if ($model->load(Yii::$app->request->post())) {
-    //             $model->updated_at = date('y-m-d h:i:s');
-    //             if($model->save())
-    //             return $this->redirect(['view', 'id' => $model->id]);
-    //         }
-    //     }
-    //     else{
-    //         return $this->redirect(Url::to(['/posts']));
-    //     }
-
-    //     return $this->render('update', [
-    //         'model' => $model,
-    //     ]);
-    // }
 
     public function actionUpdate($id)
     {

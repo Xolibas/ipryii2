@@ -16,11 +16,8 @@ class PostRepository
 
     public function remove(Post $post): void
     {
-        if(!$post->isActive())
-        {
-            if (!$post->delete()) {
-                throw new \RuntimeException('Removing error.');
-            }
+        if (!$post->delete()) {
+            throw new \RuntimeException('Removing error.');
         }
     }
 

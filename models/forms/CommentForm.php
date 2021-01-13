@@ -3,6 +3,8 @@
 namespace app\models\forms;
 
 use yii\base\Model;
+use app\models\Post;
+use app\models\User;
 
 
 class CommentForm extends Model

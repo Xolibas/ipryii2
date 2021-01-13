@@ -3,6 +3,7 @@
 namespace app\models\forms;
 
 use yii\base\Model;
+use app\models\User;
 
 
 class PostForm extends Model
@@ -18,13 +19,9 @@ class PostForm extends Model
     public function rules()
     {
         return [
-            [['id'], 'required'],
-            ['text','trim'],
-            ['text','required'],
-            [['status', 'user_id'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
+            [['text', 'title'], 'required'],
             [['id', 'title','text'], 'string', 'max' => 255],
-            [['id'], 'unique'],
+            [['created_at', 'updated_at', 'status'], 'safe'],
             [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['user_id' => 'id']],
         ];
     }

@@ -127,7 +127,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         $user->username = $username;
         $user->email = $email;
         $user->role = 'user';
-        $user->status = 1;
+        $user->status = self::STATUS_ACTIVE;
         $user->setPassword($password);
         $user->generateAuthKey();
         $user->save();
