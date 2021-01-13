@@ -18,6 +18,9 @@ use Yii;
  */
 class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
+    const STATUS_INACTIVE = 0;
+    const STATUS_ACTIVE = 1;
+    const ROLE_ADMIN = 'admin';
     /**
      * {@inheritdoc}
      */
@@ -26,46 +29,9 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return 'users';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['username', 'email', 'password'], 'required'],
-            [['username', 'email', 'password'], 'unique'],
-            [['username', 'email', 'password'], 'trim'],
-            ['password','string','min'=>6],
-            ['email','email'],
-            ['password','match', 'pattern' => '/^.*(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).*$/', 'message' => 'Password must have minimum one numeric and minimum one character in uppercase.'],
-            [['username', 'email', 'password', 'auth_key'], 'string', 'max' => 255],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'username' => 'Username',
-            'email' => 'E-mail',
-            'password' => 'Password',
-            'auth_key' => 'Auth Key',
-            'role' => 'Role',
-            'status' => 'Status'
-        ];
-    }
-
-    /**
-     * Gets query for [[Comments]].
-     *
-     * @return \yii\db\ActiveQuery
-     */
     public function getComments()
     {
-        return $this->hasMany(Comment::className(), ['user_id' => 'id']);
+        return $this->hasMany(Comment::class, ['user_id' => 'id']);
     }
 
     /**
@@ -75,7 +41,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
      */
     public function getPosts()
     {
-        return $this->hasMany(Post::className(), ['user_id' => 'id']);
+        return $this->hasMany(Post::class, ['user_id' => 'id']);
     }
 
     /**
@@ -129,6 +95,16 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return $this->auth_key === $authKey;
     }
 
+    public function isActive(): bool
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
     /**
      * Validates password
      *
@@ -144,4 +120,35 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         $this->auth_key = \Yii::$app->security->generateRandomString();
     }
+
+    public static function signup(string $username, string $email, string $password)
+    {
+        $user = new User();
+        $user->username = $username;
+        $user->email = $email;
+        $user->role = 'user';
+        $user->status = 1;
+        $user->setPassword($password);
+        $user->generateAuthKey();
+        $user->save();
+        return $user;
+    }
+
+    public function setPassword($password)
+    {
+        $this->password = Yii::$app->security->generatePasswordHash($password);
+    }
+
+    public function activate(): void
+    {
+        if($this->isActive())
+        { 
+            $this->status = self::STATUS_INACTIVE;
+        }
+        else
+        {
+            $this->status = self::STATUS_ACTIVE;
+        }
+    }
+
 }

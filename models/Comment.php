@@ -26,39 +26,24 @@ class Comment extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['user_id'], 'integer'],
-            [['text', 'post_id'], 'string', 'max' => 255],
-            [['post_id'], 'exist', 'skipOnError' => true, 'targetClass' => Post::className(), 'targetAttribute' => ['post_id' => 'id']],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'text' => 'Text',
-            'user_id' => 'User ID',
-            'post_id' => 'Post ID',
-        ];
-    }
-
-    /**
      * Gets query for [[Post]].
      *
      * @return \yii\db\ActiveQuery
      */
     public function getPost()
     {
-        return $this->hasOne(Post::className(), ['id' => 'post_id']);
+        return $this->hasOne(Post::class, ['id' => 'post_id']);
+    }
+
+    public static function create($text,$post_id): self
+    {
+        $comment = new static();
+        $comment->text = $text;
+        $comment->user_id = Yii::$app->user->id;
+        $comment->post_id = $post_id;
+        $comment->created_at = date('y-m-d h:i:s');
+
+        return $comment;
     }
 
     /**
@@ -68,6 +53,6 @@ class Comment extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::class, ['id' => 'user_id']);
     }
 }

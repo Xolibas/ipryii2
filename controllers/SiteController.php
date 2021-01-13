@@ -7,12 +7,24 @@ use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
 use app\models\User;
+use yii\helpers\Url;
+use app\models\forms\LoginForm;
+use app\models\services\LoginService;
+use app\models\services\SignupService;
+use app\models\forms\SignupForm;
 
 class SiteController extends Controller
 {
+    private $loginService;
+    private $signupService;
+
+    public function __construct($id, $module, LoginService $loginService, SignupService $signupService,  $config = [])
+    {
+        parent::__construct($id, $module, $config);
+        $this->signupService = $signupService;
+        $this->loginService = $loginService;
+    }
     /**
      * {@inheritdoc}
      */
@@ -63,9 +75,9 @@ class SiteController extends Controller
     public function actionIndex()
     {
         if(Yii::$app->user->isGuest){
-            return $this->redirect(['/site/login']);
+            return $this->redirect(Url::to(['/site/login']));
         }
-        else return $this->redirect(['/post/index']);
+        else return $this->redirect(Url::to(['/posts']));
     }
 
     /**
@@ -80,10 +92,14 @@ class SiteController extends Controller
         }
 
         $model = new LoginForm();
-        if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goBack();
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            try{
+                $this->loginService->login($model);
+                return $this->goBack();
+            }catch (\DomainException $e){
+                Yii::$app->session->setFlash('error', $e->getMessage());
+            }
         }
-
         $model->password = '';
         return $this->render('login', [
             'model' => $model,
@@ -102,51 +118,18 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-    /**
-     * Displays contact page.
-     *
-     * @return Response|string
-     */
-    public function actionContact()
-    {
-        $model = new ContactForm();
-        if ($model->load(Yii::$app->request->post()) && $model->contact(Yii::$app->params['adminEmail'])) {
-            Yii::$app->session->setFlash('contactFormSubmitted');
-
-            return $this->refresh();
-        }
-        return $this->render('contact', [
-            'model' => $model,
-        ]);
-    }
-
-    /**
-     * Displays about page.
-     *
-     * @return string
-     */
-    public function actionAbout()
-    {
-        return $this->render('about');
-    }
-
     public function actionSignup()
     {
-        $model = new User();
-    
-        if ($model->load(Yii::$app->request->post())) {      
-            if ($model->validate()) {
-                $model->password = Yii::$app->getSecurity()->generatePasswordHash($model->password);
-                $model->role = 'user';
-                $model->status = 1;
-                if($model->save()){
-                    return $this->redirect(['login']);
-                }
+        $form = new SignupForm();
+        if ($form->load(Yii::$app->request->post()) && $form->validate()) {
+            $user = $this->signupService->signup($form);
+            if (Yii::$app->getUser()->login($user)) {
+                return $this->goHome();
             }
         }
-    
+
         return $this->render('signup', [
-            'model' => $model,
+            'model' => $form,
         ]);
     }
 

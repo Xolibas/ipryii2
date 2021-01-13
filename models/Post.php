@@ -20,6 +20,8 @@ use Yii;
  */
 class Post extends \yii\db\ActiveRecord
 {
+    const INACTIVE = 0;
+    const ACTIVE = 1;
     /**
      * {@inheritdoc}
      */
@@ -29,46 +31,18 @@ class Post extends \yii\db\ActiveRecord
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public function rules()
-    {
-        return [
-            [['id'], 'required'],
-            [['text'], 'string'],
-            ['text','trim'],
-            [['status', 'user_id'], 'integer'],
-            [['created_at', 'updated_at'], 'safe'],
-            [['id', 'title','text'], 'string', 'max' => 255],
-            [['id'], 'unique'],
-            [['user_id'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['user_id' => 'id']],
-        ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function attributeLabels()
-    {
-        return [
-            'id' => 'ID',
-            'title' => 'Title',
-            'text' => 'Text',
-            'status' => 'Status',
-            'user_id' => 'User ID',
-            'created_at' => 'Created At',
-            'updated_at' => 'Updated At',
-        ];
-    }
-
-    /**
      * Gets query for [[Comments]].
      *
      * @return \yii\db\ActiveQuery
      */
     public function getComments()
     {
-        return $this->hasMany(Comment::className(), ['post_id' => 'id']);
+        return $this->hasMany(Comment::class, ['post_id' => 'id']);
+    }
+
+    public function isActive(): bool
+    {
+        return $this->status === self::ACTIVE;
     }
 
     /**
@@ -78,6 +52,27 @@ class Post extends \yii\db\ActiveRecord
      */
     public function getUser()
     {
-        return $this->hasOne(User::className(), ['id' => 'user_id']);
+        return $this->hasOne(User::class, ['id' => 'user_id']);
+    }
+
+    public static function create($title, $text, $status): self
+    {
+        $post = new static();
+        $post->title = $title;
+        $post->text = $text;
+        $post->user_id = Yii::$app->user->id;
+        $post->id = uniqid();
+        $post->status = $status;
+        $post->created_at = date('y-m-d h:i:s');
+        
+        return $post;
+    }
+
+    public function edit($title, $text, $status): void
+    {
+        $this->title = $title;
+        $this->text = $text;
+        $this->updated_at = date('y-m-d h:i:s');
+        $this->status = $status;
     }
 }
