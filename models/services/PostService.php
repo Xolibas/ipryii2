@@ -45,9 +45,9 @@ class PostService
 
     public function remove($id): void
     {
+        $post = $this->posts->get($id);
         if(!$post->isActive())
         {
-            $post = $this->posts->get($id);
             $this->posts->remove($post);
         }
     }
